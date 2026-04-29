@@ -2,11 +2,11 @@
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://pcb-defect-detection.streamlit.app)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://ahsan-neural-pcb-defect-detection.streamlit.app/)
 
 Real-time detection of 6 PCB manufacturing defects using YOLOv8s, trained on the DeepPCB benchmark dataset achieving **95.3% mAP@50**.
 
-🚀 **[Live Demo](https://pcb-defect-detection.streamlit.app)** | 📊 **[Model Card](#model-performance)** | 📖 **[Kaggle Notebook](https://www.kaggle.com/ahsanneural)**
+🚀 **[Live Demo](https://ahsan-neural-pcb-defect-detection.streamlit.app/)** | 📊 **[Model Card](#model-performance)** | 📖 **[Kaggle Notebook](https://www.kaggle.com/code/ahsanneural/pcb-defect-detection)**
 
 ---
 
@@ -88,7 +88,7 @@ pcb-defect-detection/
 - **System RAM:** Minimum 2GB (4GB+ recommended)
 - **GPU (Optional):** CUDA-capable GPU for faster inference
 
-### Installation
+### Installation & Running Locally
 
 1. **Clone the repository:**
 ```bash
@@ -114,20 +114,29 @@ streamlit run app/streamlit_app.py
 
 The app will open at `http://localhost:8501`
 
+### ✅ How the App Works
+
+- The YOLOv8s weights are stored in `model/best.pt`
+- The main app code is in `app/streamlit_app.py`
+- Upload a PCB image to instantly detect defects
+- Adjust confidence and IoU thresholds for custom detection sensitivity
+- Download results as annotated images or CSV reports
+
 ---
 
 ## 💻 Usage
 
 ### Web Interface (Recommended)
 
-1. Upload a PCB image (JPG or PNG)
-2. Adjust confidence and IoU thresholds in the sidebar
-3. View real-time detections with annotations
-4. Download results as:
+1. Visit the **[Live Demo](https://ahsan-neural-pcb-defect-detection.streamlit.app/)** (no installation needed)
+2. Upload a PCB image (JPG or PNG)
+3. Adjust confidence and IoU thresholds in the sidebar
+4. View real-time detections with annotations
+5. Download results as:
    - Annotated PNG image
    - CSV report with defect details
 
-### Python API
+### Python API (Local)
 
 ```python
 from src.inference import predict, CLASS_LABELS
@@ -213,12 +222,13 @@ And modify the device parameter in the app or code to use GPU.
 
 ---
 
-## 🔗 Links
+## 🔗 Quick Links
 
-- **Live Demo:** [Streamlit App](https://pcb-defect-detection.streamlit.app)
-- **Kaggle Notebook:** [Full Training & Evaluation](https://www.kaggle.com/ahsanneural)
-- **Kaggle Profile:** [ahsanneural](https://www.kaggle.com/ahsanneural)
-- **DeepPCB Dataset:** [GitHub](https://github.com/tangsanli5201/DeepPCB)
+- **🌐 Live Demo:** [https://ahsan-neural-pcb-defect-detection.streamlit.app/](https://ahsan-neural-pcb-defect-detection.streamlit.app/)
+- **📊 Kaggle Notebook:** [https://www.kaggle.com/code/ahsanneural/pcb-defect-detection](https://www.kaggle.com/code/ahsanneural/pcb-defect-detection)
+- **👤 Kaggle Profile:** [https://www.kaggle.com/ahsanneural](https://www.kaggle.com/ahsanneural)
+- **📂 DeepPCB Dataset:** [https://github.com/tangsanli5201/DeepPCB](https://github.com/tangsanli5201/DeepPCB)
+- **🏠 GitHub Repository:** [https://github.com/Ahsan-Neural/pcb-defect-detection](https://github.com/Ahsan-Neural/pcb-defect-detection)
 
 ---
 
