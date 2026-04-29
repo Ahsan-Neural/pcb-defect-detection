@@ -16,13 +16,20 @@ from src.inference import predict, CLASS_LABELS, CLASS_COLORS
 # ─────────────────────────────────────────────
 st.set_page_config(
     page_title = "PCB Defect Detector",
-    page_icon  = "assets/favicon.png" if os.path.exists("assets/favicon.png") else None,
     layout     = "wide"
 )
 
 MODEL_PATH = os.path.join(
     os.path.dirname(__file__), '..', 'models', 'best.pt'
 )
+
+# ─────────────────────────────────────────────
+# Cache model — loads once, reused for all uploads
+# ─────────────────────────────────────────────
+@st.cache_resource
+def load_model():
+    from ultralytics import YOLO
+    return YOLO(MODEL_PATH)
 
 # ─────────────────────────────────────────────
 # Sidebar
@@ -58,7 +65,7 @@ with st.sidebar:
     c2.metric("Precision", "94.16%")
     c1.metric("Recall",    "90.58%")
     c2.metric("mAP@50-95", "56.81%")
-    st.caption("Trained on DeepPCB benchmark · 1500 images · 6 classes")
+    st.caption("Trained on DeepPCB · 1500 images · 6 classes")
 
     st.markdown("---")
     st.markdown("#### Defect Classes")
@@ -91,6 +98,12 @@ st.markdown(
 st.markdown("---")
 
 # ─────────────────────────────────────────────
+# Preload model
+# ─────────────────────────────────────────────
+with st.spinner("Loading model..."):
+    load_model()
+
+# ─────────────────────────────────────────────
 # Upload
 # ─────────────────────────────────────────────
 uploaded_file = st.file_uploader(
@@ -120,7 +133,6 @@ if uploaded_file is not None:
 
     total = output["count"]
 
-    # Alert
     if total == 0:
         st.success("No defects detected above the current confidence threshold.")
     else:
@@ -128,7 +140,6 @@ if uploaded_file is not None:
 
     st.markdown("---")
 
-    # ── Two column layout ─────────────────────
     col_img, col_stats = st.columns([3, 2], gap="large")
 
     with col_img:
@@ -136,16 +147,14 @@ if uploaded_file is not None:
         st.image(
             output["annotated"],
             caption          = f"{total} defect(s) detected  |  "
-                               f"conf threshold: {conf_threshold}  |  "
-                               f"iou threshold: {iou_threshold}",
+                               f"conf: {conf_threshold}  |  iou: {iou_threshold}",
             use_column_width = True
         )
-        # Side-by-side original vs annotated
+
         with st.expander("Show original image"):
             uploaded_file.seek(0)
             st.image(uploaded_file.read(), use_column_width=True)
 
-        # Download
         pil_img = Image.fromarray(output["annotated"])
         buf = io.BytesIO()
         pil_img.save(buf, format="PNG")
@@ -185,7 +194,6 @@ if uploaded_file is not None:
         st.pyplot(fig)
         plt.close()
 
-        # Quick stats
         if total > 0:
             worst_class = max(per_class, key=per_class.get)
             avg_conf    = sum(
@@ -193,15 +201,14 @@ if uploaded_file is not None:
             ) / total
             st.markdown("---")
             c1, c2 = st.columns(2)
-            c1.metric("Total Defects",   total)
-            c2.metric("Avg Confidence",  f"{avg_conf*100:.1f}%")
+            c1.metric("Total Defects",  total)
+            c2.metric("Avg Confidence", f"{avg_conf*100:.1f}%")
             st.info(
-                f"Most frequent defect: "
+                f"Most frequent: "
                 f"**{worst_class.replace('_', ' ').title()}** "
                 f"({per_class[worst_class]}x)"
             )
 
-    # ── Detection Table ───────────────────────
     if output["detections"]:
         st.markdown("---")
         st.markdown("#### Detailed Detection Table")
@@ -209,20 +216,19 @@ if uploaded_file is not None:
         for i, det in enumerate(output["detections"], 1):
             x1, y1, x2, y2 = det["bbox"]
             rows.append({
-                "#"         : i,
-                "Class"     : det["class"].replace("_", " ").title(),
-                "Confidence": f"{det['confidence']*100:.1f}%",
-                "X1"        : int(x1),
-                "Y1"        : int(y1),
-                "X2"        : int(x2),
-                "Y2"        : int(y2),
-                "Width px"  : int(x2 - x1),
-                "Height px" : int(y2 - y1),
+                "#"          : i,
+                "Class"      : det["class"].replace("_", " ").title(),
+                "Confidence" : f"{det['confidence']*100:.1f}%",
+                "X1"         : int(x1),
+                "Y1"         : int(y1),
+                "X2"         : int(x2),
+                "Y2"         : int(y2),
+                "Width px"   : int(x2 - x1),
+                "Height px"  : int(y2 - y1),
             })
         df = pd.DataFrame(rows)
         st.dataframe(df, use_container_width=True, hide_index=True)
 
-        # CSV export
         csv = df.to_csv(index=False).encode("utf-8")
         st.download_button(
             label     = "Download Results as CSV",
@@ -231,9 +237,6 @@ if uploaded_file is not None:
             mime      = "text/csv"
         )
 
-# ─────────────────────────────────────────────
-# Empty state
-# ─────────────────────────────────────────────
 else:
     st.info(
         "Upload a PCB image above to begin detection.\n\n"
